@@ -1,0 +1,68 @@
+/* 自定义样式 */
+.mole {
+  width: 100%;
+  height: 100%;
+  background-color: #8B4513;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.1s;
+  position: relative;
+  overflow: hidden;
+}
+
+.mole.gold {
+  background-color: gold;
+}
+
+.mole::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  width: 60%;
+  height: 30%;
+  background-color: #A0522D;
+  border-radius: 50%;
+}
+
+.mole-word {
+  color: white;
+  font-weight: bold;
+  z-index: 1;
+  text-align: center;
+  padding: 0 5px;
+  font-size: 1.2rem;
+}
+
+.hole {
+  aspect-ratio: 1/1;
+  min-height: 60px;
+  background-color: #654321;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hole::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  width: 100%;
+  height: 10px;
+  background-color: #3D2501;
+  border-radius: 50%;
+}
+
+.scale {
+  transform: scale(0.9);
+}
+
+@media (max-width: 640px) {
+  .hole {
+    min-height: 60px;
+  }
+}
