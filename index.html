@@ -1,43 +1,141 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>打地鼠学英语</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语学习游戏合集</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .game-container {
+            display: none;
+        }
+        .game-active {
+            display: block;
+        }
+        .nav-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-  <div class="container mx-auto p-4 max-w-md">
-    <h1 class="text-3xl font-bold text-center mb-6">打地鼠学英语</h1>
-    
-    <div class="game-controls flex justify-between mb-6">
-      <button id="startBtn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        开始游戏
-      </button>
-      <div class="stats flex gap-4">
-        <div id="timer" class="bg-gray-200 p-2 rounded">60</div>
-        <div id="score" class="bg-gray-200 p-2 rounded">0</div>
-      </div>
+<body class="bg-gray-100 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex space-x-8">
+                    <button onclick="switchGame('whackamole')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition nav-active">
+                        打地鼠
+                    </button>
+                    <button onclick="switchGame('sandbag')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition">
+                        掷沙包
+                    </button>
+                    <button onclick="switchGame('match')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition">
+                        连连看
+                    </button>
+                    <button onclick="switchGame('spelling')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition">
+                        单词拼写
+                    </button>
+                    <button onclick="switchGame('flashcard')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition">
+                        闪卡
+                    </button>
+                    <button onclick="switchGame('earth')" class="nav-item px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-blue-100 transition">
+                        拯救地球
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 游戏内容区域 -->
+    <div class="max-w-7xl mx-auto py-6 px-4">
+        <!-- 打地鼠游戏 -->
+        <div id="whackamole" class="game-container game-active">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">单词打地鼠</h2>
+                <div class="game-area">
+                    <canvas id="gameCanvas" width="600" height="700" class="border border-gray-300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 掷沙包游戏 -->
+        <div id="sandbag" class="game-container">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">掷沙包 - 单词识别</h2>
+                <div class="text-center py-8">
+                    <p class="text-gray-600">游戏开发中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 连连看游戏 -->
+        <div id="match" class="game-container">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">单词连连看</h2>
+                <div class="text-center py-8">
+                    <p class="text-gray-600">游戏开发中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 单词拼写游戏 -->
+        <div id="spelling" class="game-container">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">单词拼写</h2>
+                <div class="text-center py-8">
+                    <p class="text-gray-600">游戏开发中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 闪卡游戏 -->
+        <div id="flashcard" class="game-container">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">单词闪卡</h2>
+                <div class="text-center py-8">
+                    <p class="text-gray-600">游戏开发中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 拯救地球游戏 -->
+        <div id="earth" class="game-container">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-4">拯救地球 - 单词填空</h2>
+                <div class="text-center py-8">
+                    <p class="text-gray-600">游戏开发中...</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="gameBoard" class="grid grid-cols-3 gap-4 mb-6">
-      <!-- 3x3或4x4网格将通过JS动态生成 -->
-    </div>
+    <script src="script.js"></script>
+    <script>
+        // 游戏切换功能
+        function switchGame(gameId) {
+            // 隐藏所有游戏
+            document.querySelectorAll('.game-container').forEach(container => {
+                container.classList.remove('game-active');
+            });
+            
+            // 移除所有导航激活状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('nav-active');
+            });
+            
+            // 显示选中的游戏
+            document.getElementById(gameId).classList.add('game-active');
+            
+            // 激活对应的导航项
+            event.target.classList.add('nav-active');
+        }
 
-    <div id="gameOver" class="hidden text-center">
-      <h2 class="text-2xl font-bold mb-4">游戏结束!</h2>
-      <p class="text-xl mb-4">最终得分: <span id="finalScore">0</span></p>
-      <button id="restartBtn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        再玩一次
-      </button>
-    </div>
-  </div>
-
-  <audio id="hitSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3"></audio>
-  <audio id="goldSound" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3"></audio>
-  <audio id="missSound" src="https://assets.mixkit.co/sfx/preview/mixkit-retro-arcade-lose-2027.mp3"></audio>
-
-  <script src="script.js"></script>
+        // 初始化打地鼠游戏
+        window.addEventListener('load', function() {
+            // 这里可以初始化打地鼠游戏
+            console.log('打地鼠游戏已加载');
+        });
+    </script>
 </body>
 </html>

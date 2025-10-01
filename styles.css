@@ -1,68 +1,217 @@
-/* 自定义样式 */
-.mole {
-  width: 100%;
-  height: 100%;
-  background-color: #8B4513;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.1s;
-  position: relative;
-  overflow: hidden;
+/* 基础样式 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8fafc;
 }
 
-.mole.gold {
-  background-color: gold;
+/* 导航栏样式 */
+nav {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.mole::after {
-  content: '';
-  position: absolute;
-  top: -10px;
-  width: 60%;
-  height: 30%;
-  background-color: #A0522D;
-  border-radius: 50%;
+.nav-item {
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
-.mole-word {
-  color: white;
-  font-weight: bold;
-  z-index: 1;
-  text-align: center;
-  padding: 0 5px;
-  font-size: 1.2rem;
+.nav-item:hover {
+    background-color: #dbeafe;
 }
 
-.hole {
-  aspect-ratio: 1/1;
-  min-height: 60px;
-  background-color: #654321;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
+.nav-active {
+    background-color: #3b82f6 !important;
+    color: white !important;
 }
 
-.hole::after {
-  content: '';
-  position: absolute;
-  bottom: -5px;
-  width: 100%;
-  height: 10px;
-  background-color: #3D2501;
-  border-radius: 50%;
+/* 游戏容器样式 */
+.game-container {
+    display: none;
+    animation: fadeIn 0.5s ease-in;
 }
 
-.scale {
-  transform: scale(0.9);
+.game-active {
+    display: block;
 }
 
-@media (max-width: 640px) {
-  .hole {
-    min-height: 60px;
-  }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 游戏区域样式 */
+.game-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 500px;
+}
+
+/* 卡片翻转效果 */
+.flip-card {
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+/* 按钮样式 */
+.btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+    background-color: #4b5563;
+}
+
+/* 输入框样式 */
+.input-field {
+    border: 1px solid #d1d5db;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    width: 100%;
+    max-width: 300px;
+    font-size: 1rem;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 网格布局 */
+.grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+}
+
+.grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .grid-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    nav .flex {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-item {
+        margin: 0.25rem;
+    }
+}
+
+/* 动画效果 */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.slide-in {
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* 游戏卡片样式 */
+.game-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.game-card h3 {
+    margin-top: 0;
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* 分数显示 */
+.score-display {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #059669;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+/* 游戏状态提示 */
+.game-status {
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.game-status.success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.game-status.error {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.game-status.info {
+    background-color: #dbeafe;
+    color: #1e40af;
 }

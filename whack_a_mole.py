@@ -4,6 +4,7 @@ import time
 import os
 import sys
 from pygame import mixer
+from word_audio import AudioSystem
 
 # 全局变量
 screen = None
@@ -23,17 +24,21 @@ try:
 except:
     print("音效系统初始化失败，游戏将继续但没有音效")
 
+# 初始化单词发音系统
+audio_system = AudioSystem()
+
 # 游戏常量
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 700
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 800
 GRID_SIZE = 3
-CELL_SIZE = 150
-MOLE_SIZE = 100
+CELL_SIZE = 180
+MOLE_SIZE = 120
 GOLD_PROBABILITY = 0.1
 GAME_DURATION = 60  # 60秒游戏时长
 
-# 中英文单词对照字典
+# 中英文单词对照字典（完整版，包含所有年级单词）
 WORD_DICT = {
+    # 一年级上册
     "book": "书", "ruler": "尺子", "pencil": "铅笔", "schoolbag": "书包", 
     "teacher": "教师", "I": "我", "have": "有", "a/an": "一(个)",
     "face": "脸", "ear": "耳朵", "eye": "眼睛", "nose": "鼻子", 
@@ -43,9 +48,36 @@ WORD_DICT = {
     "two": "二", "three": "三", "four": "四", "five": "五", 
     "six": "六", "seven": "七", "eight": "八", "nine": "九", 
     "ten": "十", "black": "黑色", "red": "红色", "yellow": "黄色", 
-    "green": "绿色", "blue": "蓝色", "apple": "苹果", "pear": "梨", 
-    "banana": "香蕉", "orange": "橙子", "you": "你/你们", "like": "喜欢", 
-    "yes": "是", "no": "不", "do": "助动词"
+    "green": "绿色", "blue": "蓝色", "colour": "颜色", "apple": "苹果", 
+    "pear": "梨", "banana": "香蕉", "orange": "橙子", "you": "你/你们", 
+    "like": "喜欢", "yes": "是", "no": "不", "do": "助动词",
+    
+    # 一年级下册
+    "chair": "椅子", "desk": "书桌", "blackboard": "黑板", "under": "在...下面",
+    "in": "在...里面", "where": "在哪里", "on": "在...上", "light": "灯",
+    "box": "箱子", "bed": "床", "door": "门", "near": "靠近", "behind": "在...背后",
+    "plane": "飞机", "ball": "球", "doll": "玩偶", "train": "火车", "car": "汽车",
+    "bear": "熊", "can": "可以", "sure": "当然", "sorry": "对不起", "rice": "米饭",
+    "noodles": "面条", "vegetable": "蔬菜", "fish": "鱼", "chicken": "鸡",
+    "egg": "鸡蛋", "hungry": "饥饿的", "want": "想要", "and": "和", "juice": "果汁",
+    "water": "水", "tea": "茶", "milk": "牛奶", "thirsty": "口渴的", "thanks": "谢谢",
+    "shirt": "衬衫", "socks": "袜子", "T-shirt": "T恤", "shorts": "短裤",
+    "skirt": "裙子", "dress": "连衣裙", "your": "你的",
+    
+    # 二年级上册
+    "father": "父亲", "mother": "母亲", "brother": "兄弟", "sister": "姐妹",
+    "grandmother": "祖母", "grandfather": "祖父", "who": "谁", "he": "他",
+    "she": "她", "classmate": "同学", "friend": "朋友", "woman": "女人",
+    "girl": "女孩", "man": "男人", "boy": "男孩", "look": "看", "his": "他的",
+    "her": "她的", "name": "名字", "or": "或者", "big": "大的", "tall": "高的",
+    "short": "矮的", "thin": "瘦的", "handsome": "英俊的", "pretty": "漂亮的",
+    "new": "新的", "does": "助动词", "bookshop": "书店", "park": "公园",
+    "zoo": "动物园", "hospital": "医院", "school": "学校", "supermarket": "超市",
+    "go": "去", "to": "向", "grass": "草", "tree": "树", "flower": "花",
+    "boat": "船", "lake": "湖", "hill": "小山", "Christmas": "圣诞节",
+    "Father Christmas": "圣诞老人", "Christmas tree": "圣诞树", "card": "卡片",
+    "present": "礼物", "happy": "快乐的", "New Year": "新年", "thank": "谢谢",
+    "merry": "愉快的", "here": "这里", "too": "也"
 }
 
 # 英文单词清单
@@ -60,6 +92,8 @@ GOLD = (255, 215, 0)
 RED = (255, 0, 0)
 GREEN = (0, 128, 0)
 BLUE = (0, 0, 255)
+LIGHT_GREEN = (144, 238, 144)
+DARK_GREEN = (0, 100, 0)
 
 class Mole:
     def __init__(self, x, y):
@@ -75,77 +109,42 @@ class Mole:
         self.scale = 1.0
         self.show_chinese = False
         self.color_flipped = False
+        
+        # 地鼠出现时播放单词发音
+        try:
+            audio_system.speak(self.word)
+        except Exception as e:
+            print(f"发音失败: {e}")
     
     def draw(self):
         global screen
         if not screen:
             return
             
-        # 绘制地鼠洞
-        pygame.draw.rect(screen, BROWN, (self.x - CELL_SIZE//2, self.y - CELL_SIZE//4, CELL_SIZE, CELL_SIZE//2))
-        pygame.draw.rect(screen, LIGHT_BROWN, (self.x - CELL_SIZE//2 + 5, self.y - CELL_SIZE//4 + 5, 
-                                             CELL_SIZE - 10, CELL_SIZE//2 - 10))
-        
-        # 绘制长方形地鼠
+        # 绘制圆形地鼠
         mole_color = GOLD if self.is_gold else (160, 82, 45)
-        mole_width = int(CELL_SIZE * 0.8 * self.scale)
-        mole_height = int(CELL_SIZE * 0.6 * self.scale)
-        mole_rect = pygame.Rect(self.x - mole_width//2, self.y - mole_height//2, mole_width, mole_height)
-        if screen:
-            pygame.draw.rect(screen, mole_color, mole_rect, border_radius=10)
+        mole_radius = int(CELL_SIZE * 0.4 * self.scale)
+        pygame.draw.circle(screen, mole_color, (self.x, self.y), mole_radius)
         
         # 绘制单词和中文释义
-        if not screen:
-            return
-            
         try:
-            # 尝试加载常见中文字体
-            chinese_fonts = [
-                "Microsoft YaHei",  # Windows
-                "PingFang SC",      # macOS
-                "Noto Sans CJK SC", # Linux/通用
-                "SimHei",           # 黑体
-                "Arial Unicode MS", # 通用
-                "Arial"             # 最终回退
-            ]
-            
-            # 直接尝试创建字体，捕获异常
-            available_font = None
-            for font_name in chinese_fonts:
-                try:
-                    test_font = pygame.font.SysFont(font_name, 32)
-                    # 测试是否能渲染中文
-                    test_surface = test_font.render("测试", True, WHITE)
-                    available_font = font_name
-                    break
-                except:
-                    continue
-            
-            if available_font:
-                print(f"使用字体: {available_font}")
-                font_en = pygame.font.SysFont(available_font, 32)
-                font_cn = pygame.font.SysFont(available_font, 28)
-            else:
-                print("未找到中文字体，使用默认字体")
-                # 使用SysFont而不是Font(None)来获得更好的中文支持
-                font_en = pygame.font.SysFont("Arial", 32)
-                font_cn = pygame.font.SysFont("Arial", 28)
+            font_en = get_chinese_font(24)
+            font_cn = get_chinese_font(20)
             
             # 渲染英文单词
             word_surface = font_en.render(self.word, True, WHITE)
-            word_rect = word_surface.get_rect(center=(self.x, self.y - 15 if self.is_hit else 0))
+            word_rect = word_surface.get_rect(center=(self.x, self.y - 10))
             screen.blit(word_surface, word_rect)
             
             # 如果被击中，显示中文释义
             if self.is_hit:
-                # 确保中文文本使用正确的编码
                 try:
-                    cn_text = self.chinese.encode('utf-8').decode('utf-8')
-                    cn_surface = font_cn.render(cn_text, True, WHITE)
-                    cn_rect = cn_surface.get_rect(center=(self.x, self.y + 20))
+                    cn_surface = font_cn.render(self.chinese, True, WHITE)
+                    cn_rect = cn_surface.get_rect(center=(self.x, self.y + 15))
                     screen.blit(cn_surface, cn_rect)
-                except Exception as e:
-                    print(f"渲染中文失败: {str(e)}")
+                except:
+                    # 如果中文显示失败，只显示英文
+                    pass
                 
         except Exception as e:
             print(f"绘制文字失败: {str(e)}")
@@ -154,7 +153,7 @@ class Mole:
         current_time = time.time()
         
         if self.is_hit:
-            if current_time - self.hit_time > 2.0:  # 延长显示时间
+            if current_time - self.hit_time > 1.0:  # 被击中后显示1秒
                 return False
             return True
             
@@ -164,10 +163,10 @@ class Mole:
         return True
     
     def is_clicked(self, pos):
-        mole_width = int(CELL_SIZE * 0.8 * self.scale)
-        mole_height = int(CELL_SIZE * 0.6 * self.scale)
-        mole_rect = pygame.Rect(self.x - mole_width//2, self.y - mole_height//2, mole_width, mole_height)
-        return mole_rect.collidepoint(pos)
+        # 扩大点击区域，确保移动端适配（≥40px）
+        click_radius = max(CELL_SIZE // 2, 40)
+        distance = ((pos[0] - self.x) ** 2 + (pos[1] - self.y) ** 2) ** 0.5
+        return distance <= click_radius
     
     def speak(self):
         if not mixer.get_init():
@@ -234,7 +233,6 @@ class Game:
         self.last_spawn_time = 0
 
     def create_grid(self):
-        global screen
         grid = []
         margin_x = (SCREEN_WIDTH - GRID_SIZE * CELL_SIZE) // 2
         margin_y = 200
@@ -243,9 +241,6 @@ class Game:
             for col in range(GRID_SIZE):
                 x = margin_x + col * CELL_SIZE + CELL_SIZE // 2
                 y = margin_y + row * CELL_SIZE + CELL_SIZE // 2
-                if screen:
-                    pygame.draw.circle(screen, BROWN, (x, y), CELL_SIZE // 2)
-                    pygame.draw.circle(screen, LIGHT_BROWN, (x, y + 5), CELL_SIZE // 2 - 5)
                 grid.append((x, y))
         return grid
 
@@ -297,15 +292,14 @@ class Game:
             
         # 找出所有空的地鼠洞
         available_holes = []
-        if isinstance(self.grid, list):
-            for pos in self.grid:
-                hole_empty = True
-                for mole in self.moles:
-                    if abs(mole.x - pos[0]) < CELL_SIZE and abs(mole.y - pos[1]) < CELL_SIZE:
-                        hole_empty = False
-                        break
-                if hole_empty:
-                    available_holes.append(pos)
+        for pos in self.grid:
+            hole_empty = True
+            for mole in self.moles:
+                if mole.x == pos[0] and mole.y == pos[1]:
+                    hole_empty = False
+                    break
+            if hole_empty:
+                available_holes.append(pos)
                 
         if not available_holes:
             return
@@ -327,27 +321,36 @@ class Game:
         # 绘制渐变背景
         for y in range(SCREEN_HEIGHT):
             gray_value = int(200 + (55 * y / SCREEN_HEIGHT))
-            if screen:
-                pygame.draw.line(screen, (gray_value, gray_value, gray_value), (0, y), (SCREEN_WIDTH, y))
+            pygame.draw.line(screen, (gray_value, gray_value, gray_value), (0, y), (SCREEN_WIDTH, y))
         
-        if not screen:
-            return
-            
         # 绘制游戏标题和信息区域背景
         pygame.draw.rect(screen, WHITE, (0, 0, SCREEN_WIDTH, 150))
         
-        # 强制使用默认字体绘制标题
+        # 绘制标题和分数
         try:
-            font = pygame.font.Font(None, 36)
+            font = get_chinese_font(36)
             title = font.render("Whack-A-Mole English", True, BLACK)
             screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 30))
             
             score_text = font.render(f"Score: {self.score}", True, BLACK)
-            time_text = font.render(f"Time: {int(self.time_left)}", True, BLACK)
+            time_text = font.render(f"Time: {int(self.time_left)}s", True, BLACK)
             screen.blit(score_text, (50, 100))
-            screen.blit(time_text, (SCREEN_WIDTH - 150, 100))
+            screen.blit(time_text, (SCREEN_WIDTH - 200, 100))
         except Exception as e:
             print(f"绘制界面失败: {str(e)}")
+        
+        # 绘制地鼠洞网格
+        margin_x = (SCREEN_WIDTH - GRID_SIZE * CELL_SIZE) // 2
+        margin_y = 200
+        
+        for row in range(GRID_SIZE):
+            for col in range(GRID_SIZE):
+                x = margin_x + col * CELL_SIZE + CELL_SIZE // 2
+                y = margin_y + row * CELL_SIZE + CELL_SIZE // 2
+                
+                # 绘制地鼠洞
+                pygame.draw.circle(screen, BROWN, (x, y), CELL_SIZE // 2)
+                pygame.draw.circle(screen, LIGHT_BROWN, (x, y), CELL_SIZE // 2 - 10)
         
         # 绘制地鼠
         for mole in self.moles:
@@ -356,6 +359,14 @@ class Game:
         # 游戏结束画面
         if not self.is_game_running and self.time_left <= 0:
             self.draw_game_over()
+            
+        # 绘制游戏说明
+        try:
+            font = get_chinese_font(20)
+            instruction = font.render("Click moles to score, click empty areas to lose points", True, BLACK)
+            screen.blit(instruction, (SCREEN_WIDTH//2 - instruction.get_width()//2, SCREEN_HEIGHT - 30))
+        except:
+            pass
 
     def draw_game_over(self):
         global screen
@@ -367,7 +378,7 @@ class Game:
             overlay.fill((0, 0, 0, 128))
             screen.blit(overlay, (0, 0))
             
-            font = pygame.font.Font(None, 36)
+            font = get_chinese_font(36)
             game_over = font.render("Game Over!", True, WHITE)
             final_score = font.render(f"Final Score: {self.score}", True, WHITE)
             restart = font.render("Press R to restart", True, WHITE)
@@ -418,11 +429,34 @@ class Game:
                 except:
                     pass
 
+def get_chinese_font(size=36):
+    """获取支持中文的字体"""
+    chinese_fonts = [
+        'microsoftyahei',      # 微软雅黑
+        'simhei',              # 黑体
+        'microsoftjhenghei',   # 微软正黑
+        'fangsong',            # 仿宋
+        'kaiti',               # 楷体
+        'arial'                # 回退字体
+    ]
+    
+    for font_name in chinese_fonts:
+        try:
+            font = pygame.font.SysFont(font_name, size)
+            # 测试是否能渲染中文
+            test_surface = font.render('测试', True, (0, 0, 0))
+            return font
+        except:
+            continue
+    
+    # 如果所有字体都失败，使用默认字体
+    return pygame.font.Font(None, size)
+
 def main():
     global screen
     # 初始化显示
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Whack-A-Mole English")
+    pygame.display.set_caption("Whack-A-Mole English Game")
     clock = pygame.time.Clock()
     
     # 创建游戏实例
@@ -432,8 +466,8 @@ def main():
     # 显示开始界面
     screen.fill(WHITE)
     try:
-        font = pygame.font.Font(None, 36)
-        title = font.render("Whack-A-Mole English", True, BLACK)
+        font = get_chinese_font(36)
+        title = font.render("Whack-A-Mole English Game", True, BLACK)
         start_info = font.render("Press SPACE to start", True, BLACK)
         screen.blit(title, (SCREEN_WIDTH//2 - title.get_width()//2, SCREEN_HEIGHT//2 - 50))
         screen.blit(start_info, (SCREEN_WIDTH//2 - start_info.get_width()//2, SCREEN_HEIGHT//2 + 20))
